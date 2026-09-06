@@ -11,7 +11,7 @@ class Credential(Base):
 
     The encryption key lives in the ENCRYPTION_KEY env var (see app/core/security.py),
     never in this table and never in source control. LinkedIn login credentials must
-    never be stored here — LinkedIn is not automated via login, only via unauthenticated
+    never be stored here, LinkedIn is not automated via login, only via unauthenticated
     search (JobSpy) and Gmail alert parsing.
     """
 
@@ -28,7 +28,7 @@ class Credential(Base):
 
 
 class OAuthToken(Base):
-    """OAuth tokens (Gmail, etc.) — encrypted at rest, refreshed via the provider's
+    """OAuth tokens (Gmail, etc.), encrypted at rest, refreshed via the provider's
     OAuth flow rather than ever storing an account password.
     """
 

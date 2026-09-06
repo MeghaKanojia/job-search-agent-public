@@ -1,5 +1,5 @@
 """Automated Indeed/Glassdoor/ZipRecruiter/Google-for-Jobs/LinkedIn ingestion via
-JobSpy (https://github.com/speedyapply/JobSpy) — MIT-licensed, no API key, no login.
+JobSpy (https://github.com/speedyapply/JobSpy), MIT-licensed, no API key, no login.
 
 Indeed has no meaningful rate limiting for this per current reviews, so it runs
 at the normal 4h GH Actions cadence. LinkedIn's unauthenticated search rate-limits

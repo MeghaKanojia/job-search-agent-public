@@ -1,6 +1,6 @@
 # One-time setup
 
-These are the accounts/keys only you can create — an agent can't sign up on your behalf.
+These are the accounts/keys only you can create, an agent can't sign up on your behalf.
 Everything below is free tier.
 
 ## 1. Neon (Postgres)
@@ -34,7 +34,7 @@ in config/CI, and no toggle for it in the dashboard's Settings page. Indeed and 
 via JobSpy are the real, confirmed-working sources for this pipeline. This section stays
 only so nobody re-attempts the same investigation from scratch.
 
-## 4. LLM providers — cover letters, status classification, relevance reasoning
+## 4. LLM providers: cover letters, status classification, relevance reasoning
 Two providers are supported (`pipeline/llm/`, `backend/app/services/llm/`), selectable
 per call (the dashboard's cover-letter drafting lets you pick one). Every call site falls
 back to deterministic rule-based logic if no provider is configured or a call fails, so
@@ -82,7 +82,7 @@ NULL `embedding` get processed, so it's safe to re-run anytime). Uses `fastembed
    limits at aistudio.google.com/rate-limit if you see frequent 429s, and adjust
    `min_interval_seconds` in `pipeline/llm/gemini_provider.py` accordingly.
 
-## 5. Google Cloud (Gmail API — no email password ever used)
+## 5. Google Cloud (Gmail API, no email password ever used)
 1. Create a project at console.cloud.google.com, enable the **Gmail API**.
 2. Configure the OAuth consent screen (External, Testing mode is fine for personal use).
 3. Create an OAuth Client ID (type: Desktop app) → `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`.
@@ -131,10 +131,10 @@ and `VITE_API_BASE_URL` below are for.
 
 **Order matters the first time:** deploy Render first (you need its URL for Vercel's `VITE_API_BASE_URL`), then Vercel (you need its URL for Render's `CORS_ALLOW_ORIGINS`), then go back and set `CORS_ALLOW_ORIGINS` on Render and redeploy it once you have the real Vercel URL.
 
-## 10. Databricks Free Edition (analytics layer — not required to see the pipeline work end-to-end)
+## 10. Databricks Free Edition (analytics layer, not required to see the pipeline work end-to-end)
 1. Create a free workspace at databricks.com (Free Edition).
 2. Create a secret scope holding your Neon `DATABASE_URL`.
-3. Deploy `pipeline/databricks/` as a Workflow and set its **native** schedule inside the workspace UI — it pulls from Postgres on its own; nothing external triggers it.
+3. Deploy `pipeline/databricks/` as a Workflow and set its **native** schedule inside the workspace UI: it pulls from Postgres on its own; nothing external triggers it.
 4. This step can come after you've verified ingestion → dashboard works via the rule-based `matching.py` scorer alone.
 
 ## 11. Codespaces

@@ -15,7 +15,7 @@ class DocumentType(str, enum.Enum):
 class Document(Base):
     """A generated resume/cover-letter file, one row per version, tied to one application.
 
-    Stored as raw bytes in Postgres rather than an object store — Render's free
+    Stored as raw bytes in Postgres rather than an object store: Render's free
     web-service filesystem is ephemeral (wiped on redeploy), and volume here is
     a handful of small PDFs, not worth adding S3/R2 credentials for.
     """

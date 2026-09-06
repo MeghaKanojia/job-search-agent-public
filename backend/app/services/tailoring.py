@@ -2,7 +2,7 @@
 
 Hard rule, non-negotiable: this module may only ever surface skills/bullets that
 already exist in `skill_profile_items` (your self-reported, truthful profile).
-It reorders and emphasizes based on JD overlap — it never invents a skill you
+It reorders and emphasizes based on JD overlap, it never invents a skill you
 don't actually have. `tests/test_tailoring.py` asserts this directly.
 
 Resume rendering is template-based (Jinja2 + WeasyPrint), zero-cost and
@@ -39,7 +39,7 @@ def select_relevant_skills(
 ) -> list[SkillProfileEntry]:
     """Filter + reorder the user's truthful skill profile by JD relevance.
 
-    Never adds anything not already in `profile` — the return value is always
+    Never adds anything not already in `profile`, the return value is always
     a subset (reordered) of the input.
     """
     jd_words = extract_keywords(jd_text)

@@ -3,7 +3,7 @@
 The encryption key lives only in the ENCRYPTION_KEY env var (never in the DB,
 never committed). Generate one with `Fernet.generate_key()` and store it as a
 Render/GitHub Actions secret. Losing the key means every stored secret becomes
-unrecoverable — that's intentional; it must not be recoverable from the DB alone.
+unrecoverable, that's intentional; it must not be recoverable from the DB alone.
 """
 
 from cryptography.fernet import Fernet

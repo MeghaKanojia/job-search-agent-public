@@ -1,7 +1,7 @@
 """Rule-based keyword-overlap scoring between a job posting and your skill profile.
 
 This is the v1 scorer (also mirrored in pipeline/databricks/notebooks/03_gold_scored_matches.py
-for the batch/Databricks path). Deliberately simple and explainable — an MLflow-tracked
+for the batch/Databricks path). Deliberately simple and explainable, an MLflow-tracked
 model can replace it later once enough labeled outcomes (applied/interview/rejected) exist.
 """
 

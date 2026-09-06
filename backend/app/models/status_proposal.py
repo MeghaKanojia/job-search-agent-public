@@ -8,7 +8,7 @@ from app.core.db import Base
 
 class StatusUpdateProposal(Base):
     """A Gmail-derived guess at a status change. Always surfaced for the user to
-    confirm/correct in the dashboard — never silently applied to `applications.status`.
+    confirm/correct in the dashboard, never silently applied to `applications.status`.
     """
 
     __tablename__ = "status_update_proposals"

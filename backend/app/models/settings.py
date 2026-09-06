@@ -7,7 +7,7 @@ from app.core.db import Base
 
 
 class KeywordFilter(Base):
-    """Your editable role/skill filter list — controls what the pipeline ingests at all."""
+    """Your editable role/skill filter list: controls what the pipeline ingests at all."""
 
     __tablename__ = "keyword_filters"
 

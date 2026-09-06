@@ -11,7 +11,7 @@ EMBEDDING_DIM = 384
 
 
 class SkillProfileItem(Base):
-    """Your truthful, self-reported skills — the ONLY source CV tailoring may draw
+    """Your truthful, self-reported skills: the ONLY source CV tailoring may draw
     from. tailoring.py must never emit a skill absent from this table.
     """
 
