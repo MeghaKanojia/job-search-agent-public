@@ -1,0 +1,37 @@
+# Databricks Asset Bundle -- deploy with `databricks bundle deploy` from a
+# machine/Codespace with the Databricks CLI configured against your Free Edition
+# workspace. Sets up the job graph; set its schedule via the Workflow's own UI
+# after first deploy (native scheduling, not externally triggered -- see README).
+
+bundle:
+  name: job-search-agent
+
+resources:
+  jobs:
+    medallion_pipeline:
+      name: job-search-agent-medallion
+      tasks:
+        - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: ./notebooks/01_bronze_ingest.py
+        - task_key: silver_clean_dedup
+          depends_on:
+            - task_key: bronze_ingest
+          notebook_task:
+            notebook_path: ./notebooks/02_silver_clean_dedup.py
+        - task_key: gold_scored_matches
+          depends_on:
+            - task_key: silver_clean_dedup
+          notebook_task:
+            notebook_path: ./notebooks/03_gold_scored_matches.py
+
+    resume_match_training:
+      name: job-search-agent-resume-match-training
+      tasks:
+        - task_key: train
+          notebook_task:
+            notebook_path: ./notebooks/04_resume_match_model_train.py
+
+targets:
+  dev:
+    default: true

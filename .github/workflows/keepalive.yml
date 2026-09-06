@@ -1,0 +1,26 @@
+name: Keepalive
+
+# GitHub auto-disables scheduled workflows after 60 days with no commit activity.
+# This trivial monthly commit keeps ingest-professional.yml and gmail-status-sync.yml
+# from silently going dormant if the repo otherwise goes untouched.
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          git config user.name "keepalive-bot"
+          git config user.email "actions@github.com"
+          date -u +"Last keepalive: %Y-%m-%dT%H:%M:%SZ" > .github/.keepalive
+          git add .github/.keepalive
+          git commit -m "chore: monthly keepalive commit" || echo "nothing to commit"
+          git push

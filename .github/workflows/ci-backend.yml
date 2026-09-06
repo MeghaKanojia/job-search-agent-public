@@ -1,0 +1,24 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths: ["backend/**"]
+  push:
+    branches: [main]
+    paths: ["backend/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # weasyprint needs these system libs at import time (dynamically loaded, not
+      # bundled in the pip wheel) -- without them, importing app.services.tailoring
+      # fails and every test in that chain silently breaks. Same packages as
+      # backend/Dockerfile's runtime image.
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+      - run: pip install -r backend/requirements.txt
+      - run: cd backend && python -m pytest

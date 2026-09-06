@@ -1,0 +1,68 @@
+import { useState } from "react";
+import { NavLink, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import ApplicationsTracker from "./pages/ApplicationsTracker";
+import NewMatches from "./pages/NewMatches";
+import Profile from "./pages/Profile";
+import ResumeLibrary from "./pages/ResumeLibrary";
+import ReviewQueue from "./pages/ReviewQueue";
+import SettingsPage from "./pages/Settings";
+import { getAuthHeader, setAuthHeader } from "./api/client";
+import Login from "./components/Login";
+import { ToastProvider } from "./components/Toast";
+
+const NAV_ITEMS = [
+  { to: "/", label: "New Matches" },
+  { to: "/review", label: "Review Queue" },
+  { to: "/tracker", label: "Applications" },
+  { to: "/resumes", label: "Resume Library" },
+  { to: "/profile", label: "Profile" },
+  { to: "/settings", label: "Settings" },
+];
+
+export default function App() {
+  const [authed, setAuthed] = useState(() => !!getAuthHeader());
+
+  if (!authed) {
+    return <Login onSuccess={() => setAuthed(true)} />;
+  }
+
+  const signOut = () => {
+    setAuthHeader(null);
+    setAuthed(false);
+  };
+
+  return (
+    <ToastProvider>
+      <Router>
+        <div className="app-shell">
+          <nav className="sidebar">
+            <h2>Job Search Agent</h2>
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            <button className="nav-link sign-out-link" onClick={signOut}>
+              Sign out
+            </button>
+          </nav>
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<NewMatches />} />
+              <Route path="/review" element={<ReviewQueue />} />
+              <Route path="/tracker" element={<ApplicationsTracker />} />
+              <Route path="/resumes" element={<ResumeLibrary />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </ToastProvider>
+  );
+}

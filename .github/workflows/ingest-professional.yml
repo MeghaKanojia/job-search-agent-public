@@ -1,0 +1,33 @@
+name: Ingest professional job pipeline
+
+on:
+  schedule:
+    # 4x/day, not 6x -- deduping is already handled (dedup_hash + ON CONFLICT
+    # DO NOTHING), so there's no benefit to checking more often than this, and
+    # it directly reduces LLM API usage against the daily quotas involved.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r pipeline/requirements.txt
+
+      - name: Run ingestion
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          IRISH_BOARDS_SEARCH_URL: ${{ secrets.IRISH_BOARDS_SEARCH_URL }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python -m pipeline.run_ingest
