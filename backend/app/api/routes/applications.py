@@ -89,7 +89,7 @@ def draft_cover_letter_for_application(
     grounding_facts = "Candidate's most relevant skills/experience:\n" + "\n".join(grounding_lines)
 
     letter_body = draft_cover_letter(
-        candidate_name="Alex Morgan",
+        candidate_name="Megha Kanojia",
         company=application.company or "the company",
         role_title=application.role_title or "the role",
         jd_text=jd_text,

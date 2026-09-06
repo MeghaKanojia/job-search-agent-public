@@ -5,7 +5,7 @@ def test_draft_cover_letter_returns_llm_output_when_available(monkeypatch):
     monkeypatch.setattr(tailoring, "llm_chat", lambda *a, **k: "Dear hiring team, I am writing to apply...")
 
     result = tailoring.draft_cover_letter(
-        candidate_name="Alex Morgan",
+        candidate_name="Megha Kanojia",
         company="Acme Corp",
         role_title="Data Engineer",
         jd_text="We need a data engineer with Python and SQL.",
@@ -21,7 +21,7 @@ def test_draft_cover_letter_returns_none_when_llm_unavailable(monkeypatch):
     monkeypatch.setattr(tailoring, "llm_chat", lambda *a, **k: None)
 
     result = tailoring.draft_cover_letter(
-        candidate_name="Alex Morgan",
+        candidate_name="Megha Kanojia",
         company="Acme Corp",
         role_title="Data Engineer",
         jd_text="We need a data engineer.",

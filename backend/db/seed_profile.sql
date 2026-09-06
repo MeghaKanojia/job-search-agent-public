@@ -1,7 +1,7 @@
--- DEMO REPO NOTE: this is entirely fictional sample data for "Alex Morgan", a
--- made-up candidate, published as part of a sanitized portfolio/demo replica
--- of a private personal project. No real person, employer, or project is
--- represented here.
+-- DEMO REPO NOTE: this is fictional sample data, published as part of a
+-- sanitized portfolio/demo replica of a private personal project. No real
+-- employer or project is represented here -- only the candidate's name
+-- (in backend/app/api/routes/documents.py) is real.
 --
 -- Run once against your Neon database, after migration_002_profile_sections.sql:
 --   psql $DATABASE_URL -f backend/db/seed_profile.sql
@@ -33,19 +33,19 @@ INSERT INTO projects (title, description, tech_stack, project_url, sort_order) V
 ('Grammy vs Spotify: Critical Acclaim vs Commercial Success',
  'End-to-end PySpark ETL pipeline investigating the divergence between Grammy-winning songs and Spotify popularity. Built three distinct cohorts, resolved cross-dataset entity mismatches via regex and manual mapping, and produced interactive visualisations comparing audio features across 2000-2023.',
  'PySpark, Apache Spark, Pandas, Parquet, Seaborn, Google Colab, ipywidgets',
- 'https://github.com/alexmorgan-demo/grammy-spotify-analysis', 0),
+ 'https://github.com/demo-sample-profile/grammy-spotify-analysis', 0),
 ('Detecting AI-Generated Product Images on an Online Marketplace',
  'Three-phase ML study classifying AI-generated vs authentic product images. Progressed from frozen CNN plus classical ML (F1: 0.81) through EfficientNetV2-S fine-tuning (F1: 0.91) to a ConvNeXt-Base model with an FFT frequency branch, reaching a validation F1 of 0.9356. Rigorous ablations on augmentation, TTA, and threshold tuning.',
  'PyTorch, TensorFlow, timm, ConvNeXt, EfficientNetV2, Focal Loss, SWA, scikit-learn, OpenCV',
- 'https://github.com/alexmorgan-demo/ai-image-detection-demo', 1),
+ 'https://github.com/demo-sample-profile/ai-image-detection-demo', 1),
 ('Retail E-Commerce Sales ETL Pipeline',
  'Production-style ETL pipeline merging 231K+ grocery transactions with economic feature data (CPI, unemployment, fuel prices). Cleaned and filtered to 106K analysis-ready records, revealing November-December holiday demand peaks averaging $39K weekly vs $32K in October.',
  'Python, Pandas, SQL, Parquet, PyArrow',
- 'https://github.com/alexmorgan-demo/retail-etl-pipeline', 2),
+ 'https://github.com/demo-sample-profile/retail-etl-pipeline', 2),
 ('Forecasting Atmospheric Radioactivity - Regional Monitoring Network',
  'Comparative study of SARIMA, ETS, and TBATS models on 9 years of monthly atmospheric radiation data from a regional monitoring network, achieving a top test RMSE of 22.26. Rigorous train-test validation revealed SARIMA generalises best despite ETS winning in-sample, a key lesson in overfitting. Contribution: TBATS trigonometric seasonal modelling and feature engineering.',
  'R, forecast, SARIMA, TBATS, ETS, tseries, ggplot2, R Markdown',
- 'https://github.com/alexmorgan-demo/forecasting-radioactivity-demo', 3);
+ 'https://github.com/demo-sample-profile/forecasting-radioactivity-demo', 3);
 
 -- issue_date left NULL throughout, same as the private original -- fill in via
 -- the Profile page if you want them shown.

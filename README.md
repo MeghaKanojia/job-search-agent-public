@@ -1,10 +1,11 @@
 # Job Search Agent (Demo)
 
 > **This is a sanitized, portfolio/demo replica of a private personal project.**
-> Every name, contact detail, work history entry, and project shown here belongs
-> to a fictional candidate ("Alex Morgan") — no real person's data is in this
-> repository. The private original runs against a real Gmail inbox and real
-> application data, which is exactly why it isn't the thing being shown publicly.
+> The name shown throughout is real (this is my own project), but every contact
+> detail, employer, and work history entry is a fictional placeholder — no real
+> personal data is in this repository. The private original runs against a real
+> Gmail inbox and real application data, which is exactly why that one isn't
+> the thing being shown publicly.
 
 An end-to-end, zero-budget job-search tool: ingests real postings (Indeed/Glassdoor/ZipRecruiter/Google via [JobSpy](https://github.com/speedyapply/JobSpy), LinkedIn job-alert emails, and opt-in Irish job boards), scores them against a skill profile, tailors a CV per posting, tracks every application, and syncs status from Gmail replies — all on free tiers.
 

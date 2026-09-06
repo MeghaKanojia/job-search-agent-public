@@ -34,15 +34,15 @@ router = APIRouter(prefix="/api", tags=["documents"])
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # a real resume PDF is a few hundred KB at most
 
-# DEMO REPO NOTE: this is a sanitized, fictional-data replica of a private
-# personal project, published as a portfolio/demo piece. This candidate is
-# entirely made up -- "Alex Morgan" doesn't exist, and every contact detail
-# below is a placeholder, not a real person's information.
+# DEMO REPO NOTE: this is a sanitized replica of a private personal project,
+# published as a portfolio/demo piece. The name below is real (this is my own
+# project); every contact detail, employer, and project fact is a fictional
+# placeholder, not real information.
 #
 # Matches the name hardcoded in applications.py's draft_cover_letter route --
 # there's no per-user account system in this single-user tool, so these are
 # literal constants rather than settings fields.
-CANDIDATE_NAME = "Alex Morgan"
+CANDIDATE_NAME = "Megha Kanojia"
 CANDIDATE_HEADLINE = "Graduate Data Scientist | Python, SQL & Analytics Engineering"
 CANDIDATE_SUMMARY = (
     "2026 MSc Computing (Data Analytics) graduate from Riverdale University, First Class "
@@ -58,9 +58,9 @@ CANDIDATE_CONTACT = {
     "headline": CANDIDATE_HEADLINE,
     "location": "Dublin, Ireland",
     "phone": "+353 1 234 5678",
-    "email": "alex.morgan.demo@example.com",
-    "linkedin": "https://www.linkedin.com/in/alexmorgan-demo",
-    "github": "https://github.com/alexmorgan-demo",
+    "email": "demo.sample.profile@example.com",
+    "linkedin": "https://www.linkedin.com/in/demo-sample-profile",
+    "github": "https://github.com/demo-sample-profile",
 }
 
 
