@@ -36,20 +36,32 @@ export default function App() {
       <Router>
         <div className="app-shell">
           <nav className="sidebar">
-            <h2>Job Search Agent</h2>
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/"}
-                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-            <button className="nav-link sign-out-link" onClick={signOut}>
-              Sign out
-            </button>
+            <div className="sidebar-profile-card">
+              <div className="sidebar-avatar">JS</div>
+              <div className="sidebar-name">Job Search Agent</div>
+              <div className="sidebar-tagline">AI-tailored job search, end to end</div>
+            </div>
+
+            <div className="sidebar-nav-card">
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === "/"}
+                  className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+              <button className="nav-link sign-out-link" onClick={signOut}>
+                Sign out
+              </button>
+            </div>
+
+            <div className="sidebar-footer-card">
+              Zero-budget pipeline: ingestion, RAG-tailored resumes and cover letters, and
+              application tracking, end to end.
+            </div>
           </nav>
           <main className="main-content">
             <Routes>

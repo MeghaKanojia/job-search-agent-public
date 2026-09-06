@@ -66,6 +66,7 @@ function FieldInput({
     return (
       <input
         type="checkbox"
+        className="w-4 h-4 accent-blue-600 cursor-pointer"
         checked={Boolean(value)}
         onChange={(e) => setForm({ ...form, [field.key]: e.target.checked })}
       />
@@ -74,6 +75,7 @@ function FieldInput({
   if (field.type === "textarea") {
     return (
       <textarea
+        className="field-input w-full"
         rows={3}
         value={String(value ?? "")}
         placeholder={field.placeholder}
@@ -83,6 +85,7 @@ function FieldInput({
   }
   return (
     <input
+      className="field-input w-full"
       type={field.type}
       value={String(value ?? "")}
       placeholder={field.placeholder}
@@ -170,10 +173,8 @@ export default function SectionManager<T extends BaseItem>({
         editingId === item.id ? (
           <div className="review-card" key={item.id}>
             {fields.map((f) => (
-              <div key={f.key} style={{ marginBottom: "0.6rem" }}>
-                <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block", marginBottom: "0.2rem" }}>
-                  {f.label}
-                </label>
+              <div key={f.key} className="mb-2.5">
+                <label className="text-xs text-slate-500 block mb-1">{f.label}</label>
                 <FieldInput field={f} form={editForm} setForm={setEditForm} />
               </div>
             ))}
@@ -197,7 +198,7 @@ export default function SectionManager<T extends BaseItem>({
               .map((f) => {
                 const text = (item as unknown as Record<string, unknown>)[f.key];
                 return text ? (
-                  <p key={f.key} style={{ whiteSpace: "pre-wrap", fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+                  <p key={f.key} className="whitespace-pre-wrap text-sm text-slate-500 mt-2">
                     {String(text)}
                   </p>
                 ) : null;

@@ -105,54 +105,35 @@ export default function NewMatches() {
       </div>
 
       <div className="card">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Company</th>
-              <th>Source</th>
-              <th>Score</th>
-              <th>Posted</th>
-              <th>Found by pipeline</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {postings.map((p) => (
-              <tr key={p.id}>
-                <td>
-                  <a
-                    className="job-title-link"
-                    href={p.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    title={p.relevance_reasoning ?? undefined}
-                  >
-                    {p.title}
-                  </a>
-                </td>
-                <td>{p.company ?? "-"}</td>
-                <td>{p.source}</td>
-                <td>
-                  {p.keyword_match_score !== null ? (
-                    <span className="badge badge-score">{p.keyword_match_score.toFixed(2)}</span>
-                  ) : (
-                    "-"
-                  )}
-                </td>
-                <td>
-                  <FreshnessBadge postedAt={p.posted_at} />
-                </td>
-                <td>{formatDate(p.ingested_at)}</td>
-                <td>
-                  <button className="btn" onClick={() => stage(p.id)}>
-                    Stage for review
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {postings.map((p) => (
+          <div className="job-row" key={p.id}>
+            <div className="job-row-icon">{(p.company ?? p.source).charAt(0).toUpperCase()}</div>
+            <div className="job-row-main">
+              <a
+                className="job-title-link"
+                href={p.url}
+                target="_blank"
+                rel="noreferrer"
+                title={p.relevance_reasoning ?? undefined}
+              >
+                {p.title}
+              </a>
+              <div className="job-row-meta">
+                {p.company ?? "Unknown company"} · {p.source} · <FreshnessBadge postedAt={p.posted_at} /> · found{" "}
+                {formatDate(p.ingested_at)}
+              </div>
+            </div>
+            <div className="job-row-value">
+              {p.salary_text && <div>{p.salary_text}</div>}
+              {p.keyword_match_score !== null && (
+                <span className="badge badge-score">{p.keyword_match_score.toFixed(2)}</span>
+              )}
+            </div>
+            <button className="btn btn-small" onClick={() => stage(p.id)}>
+              Stage for review
+            </button>
+          </div>
+        ))}
         {postings.length === 0 && !error && (
           <div className="empty-state">No matches yet for these filters. Try widening the date range.</div>
         )}

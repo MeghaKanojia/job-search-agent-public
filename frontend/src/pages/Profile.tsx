@@ -153,18 +153,21 @@ function SkillsSection() {
                 <tr key={item.id}>
                   <td>
                     <input
+                      className="field-input w-full"
                       value={editForm.skill_name}
                       onChange={(e) => setEditForm({ ...editForm, skill_name: e.target.value })}
                     />
                   </td>
                   <td>
                     <input
+                      className="field-input w-full"
                       value={editForm.category ?? ""}
                       onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                     />
                   </td>
                   <td>
                     <input
+                      className="field-input w-full"
                       type="number"
                       step={0.5}
                       min={0}
@@ -179,6 +182,7 @@ function SkillsSection() {
                   </td>
                   <td>
                     <input
+                      className="field-input w-full"
                       value={editForm.evidence_bullet ?? ""}
                       onChange={(e) => setEditForm({ ...editForm, evidence_bullet: e.target.value })}
                     />
@@ -238,22 +242,14 @@ export default function Profile() {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", borderBottom: "1px solid var(--border)" }}>
+      <div className="flex gap-2 mb-6 border-b border-slate-100">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className="btn-small"
-            style={{
-              background: "none",
-              border: "none",
-              borderBottom: tab === t ? "2px solid var(--primary)" : "2px solid transparent",
-              borderRadius: 0,
-              padding: "0.6rem 0.9rem",
-              fontWeight: tab === t ? 700 : 500,
-              color: tab === t ? "var(--primary)" : "var(--text-muted)",
-              cursor: "pointer",
-            }}
+            className={`bg-transparent border-0 rounded-none px-3.5 py-2.5 cursor-pointer border-b-2 ${
+              tab === t ? "border-blue-600 text-blue-600 font-bold" : "border-transparent text-slate-500 font-medium"
+            }`}
           >
             {t}
           </button>
