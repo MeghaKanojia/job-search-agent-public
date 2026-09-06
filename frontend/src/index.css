@@ -83,6 +83,14 @@
     @apply mt-4;
   }
 
+  .demo-banner {
+    @apply bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5 text-xs text-blue-900 my-2 leading-relaxed;
+  }
+
+  .demo-banner-link {
+    @apply border-0 bg-transparent p-0 text-blue-600 underline cursor-pointer font-semibold text-xs;
+  }
+
   /* Page chrome */
   .page-header {
     @apply flex items-baseline justify-between mb-5;

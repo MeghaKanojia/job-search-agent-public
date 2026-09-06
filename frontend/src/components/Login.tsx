@@ -36,11 +36,24 @@ export default function Login({ onSuccess }: { onSuccess: () => void }) {
     }
   };
 
+  const fillDemoCredentials = () => {
+    setUsername("public");
+    setPassword("12345");
+  };
+
   return (
     <div className="login-screen">
       <form className="login-card" onSubmit={submit}>
         <h1>Job Search Agent</h1>
-        <p className="page-subtitle">Sign in to continue</p>
+        <p className="page-subtitle">Public portfolio demo, no real personal data behind this login</p>
+        <div className="demo-banner">
+          This is a public demo. Sign in with username <strong>public</strong> and password{" "}
+          <strong>12345</strong>, or{" "}
+          <button type="button" className="demo-banner-link" onClick={fillDemoCredentials}>
+            click to fill them in
+          </button>
+          .
+        </div>
         {error && <div className="error-banner">{error}</div>}
         <label htmlFor="login-username">Username</label>
         <input
