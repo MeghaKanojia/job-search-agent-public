@@ -37,7 +37,9 @@ export default function App() {
         <div className="app-shell">
           <nav className="sidebar">
             <div className="sidebar-profile-card">
-              <div className="sidebar-avatar">JS</div>
+              <div className="sidebar-avatar">
+                <img src="/logo.png" alt="Job Search Agent logo" />
+              </div>
               <div className="sidebar-name">Job Search Agent</div>
               <div className="sidebar-tagline">AI-tailored job search, end to end</div>
             </div>
