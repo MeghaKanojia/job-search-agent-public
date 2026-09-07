@@ -6,7 +6,7 @@
       "version": "20"
     }
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info && pip install -r backend/requirements.txt -r pipeline/requirements.txt && npm install --prefix frontend",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 && pip install -r backend/requirements.txt -r pipeline/requirements.txt && npm install --prefix frontend",
   "forwardPorts": [8000, 5173],
   "portsAttributes": {
     "8000": { "label": "FastAPI backend" },

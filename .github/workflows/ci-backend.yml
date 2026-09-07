@@ -19,6 +19,6 @@ jobs:
       # bundled in the pip wheel) -- without them, importing app.services.tailoring
       # fails and every test in that chain silently breaks. Same packages as
       # backend/Dockerfile's runtime image.
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
       - run: pip install -r backend/requirements.txt
       - run: cd backend && python -m pytest

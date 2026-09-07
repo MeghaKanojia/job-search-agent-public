@@ -1,13 +1,15 @@
 FROM python:3.11-slim-bookworm
 
-# Pinned to bookworm specifically (matching .devcontainer/devcontainer.json)
-# because the floating `python:3.11-slim` tag can land on a newer Debian
-# release where these exact package names have been renamed (e.g.
-# libgdk-pixbuf2.0-0), breaking this apt-get install with no code change.
-
-# WeasyPrint needs these native libs for PDF rendering
+# Exact package list per WeasyPrint's own current docs for Debian >= 11 with
+# prebuilt wheels (https://doc.courtbouillon.org/weasyprint/stable/first_steps.html#debian-ubuntu):
+# libpango-1.0-0, libpangoft2-1.0-0, libharfbuzz-subset0. Earlier versions of
+# this file installed a broader, outdated set (libpangocairo-1.0-0,
+# libgdk-pixbuf2.0-0, libffi-dev, shared-mime-info) that happened to work in
+# the bookworm-based Codespace but broke a Render build with "Package
+# 'libgdk-pixbuf2.0-0' has no installation candidate" -- that package isn't
+# actually required by current WeasyPrint at all.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info \
+    libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
