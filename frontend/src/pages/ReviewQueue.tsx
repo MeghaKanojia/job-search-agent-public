@@ -9,6 +9,13 @@ function docLabel(doc: DocumentItem): string {
 
 type GeneratingTarget = { id: number; kind: "resume" | "cover_letter" };
 
+// Anything still awaiting a move-to decision. approved_ready_to_submit is
+// legacy (from the old Approve button, now removed) but a row can still be
+// sitting in it, so it's included here rather than only staged_for_review --
+// otherwise a row in that status would be excluded from New Matches (it has
+// an Application row) yet invisible everywhere else.
+const PENDING_STATUSES = ["staged_for_review", "approved_ready_to_submit"];
+
 export default function ReviewQueue() {
   const [apps, setApps] = useState<Application[]>([]);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
@@ -24,7 +31,7 @@ export default function ReviewQueue() {
   const { showToast } = useToast();
 
   const load = () => {
-    api.listApplications("staged_for_review").then(setApps);
+    api.listApplications().then((all) => setApps(all.filter((a) => PENDING_STATUSES.includes(a.status))));
     api.listDocuments().then(setDocs);
   };
 

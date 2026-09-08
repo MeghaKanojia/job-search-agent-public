@@ -4,26 +4,11 @@ import Pagination from "../components/Pagination";
 
 const PAGE_SIZE = 15;
 
-const STATUSES = [
-  "new",
-  "staged_for_review",
-  "approved_ready_to_submit",
-  "applied",
-  "viewed",
-  "interview",
-  "offer",
-  "rejected",
-  "withdrawn",
-];
-
-const POSITIVE_STATUSES = new Set(["interview", "offer"]);
-const NEGATIVE_STATUSES = new Set(["rejected", "withdrawn"]);
-
-function statusBadgeClass(status: string): string {
-  if (POSITIVE_STATUSES.has(status)) return "badge badge-fresh";
-  if (NEGATIVE_STATUSES.has(status)) return "badge badge-negative";
-  return "badge badge-neutral";
-}
+// This tracker is for applications that have actually been submitted and their
+// post-apply lifecycle -- "new"/"staged_for_review"/"approved_ready_to_submit"
+// belong to New Matches/Review Queue instead, so they're excluded here both as
+// filter/edit options and from the listing itself (see load()).
+const STATUSES = ["applied", "viewed", "interview", "offer", "rejected", "withdrawn"];
 
 function latestResumeFor(docs: DocumentItem[], applicationId: number): DocumentItem | null {
   const resumes = docs.filter((d) => d.application_id === applicationId && d.doc_type === "resume");
@@ -41,11 +26,35 @@ export default function ApplicationsTracker() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [resumeMenuOpenId, setResumeMenuOpenId] = useState<number | null>(null);
   const fileInputs = useRef<Record<number, HTMLInputElement | null>>({});
 
+  useEffect(() => {
+    if (resumeMenuOpenId === null) return;
+    const closeOnOutsideClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".icon-menu-wrapper")) {
+        setResumeMenuOpenId(null);
+      }
+    };
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, [resumeMenuOpenId]);
+
   const load = () => {
-    api.listApplications(statusFilter || undefined).then(setApps);
+    api
+      .listApplications(statusFilter || undefined)
+      .then((data) => setApps(data.filter((a) => STATUSES.includes(a.status))));
     api.listDocuments().then(setDocs);
+  };
+
+  const changeStatus = async (id: number, status: string) => {
+    setError(null);
+    try {
+      await api.updateApplicationStatus(id, status);
+      load();
+    } catch (e) {
+      setError(String(e));
+    }
   };
 
   useEffect(() => {
@@ -110,7 +119,20 @@ export default function ApplicationsTracker() {
   };
 
   const triggerUpload = (applicationId: number) => {
+    setResumeMenuOpenId(null);
     fileInputs.current[applicationId]?.click();
+  };
+
+  const deleteResume = async (documentId: number) => {
+    setResumeMenuOpenId(null);
+    if (!window.confirm("Delete this resume? This can't be undone.")) return;
+    setError(null);
+    try {
+      await api.deleteDocument(documentId);
+      load();
+    } catch (e) {
+      setError(String(e));
+    }
   };
 
   const handleUpload = async (applicationId: number, fileList: FileList | null) => {
@@ -213,29 +235,77 @@ export default function ApplicationsTracker() {
                   <td>{a.role_title ?? "-"}</td>
                   <td>{a.source_portal ?? "-"}</td>
                   <td>
-                    <span className={statusBadgeClass(a.status)}>{a.status}</span>
+                    <select
+                      className="field-input text-xs py-1.5"
+                      value={a.status}
+                      onChange={(e) => changeStatus(a.id, e.target.value)}
+                      aria-label={`Status for ${a.role_title ?? "application"}`}
+                    >
+                      {STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                   <td>{new Date(a.last_status_change_at).toLocaleDateString()}</td>
                   <td>
+                    <div className="flex items-center gap-1.5">
                     {resume ? (
                       <a
-                        className="btn btn-secondary btn-small"
+                        className="icon-btn"
                         href={api.documentPreviewUrl(resume.id)}
                         target="_blank"
                         rel="noreferrer"
+                        aria-label={`View resume v${resume.version_number}`}
+                        title={`View resume v${resume.version_number}`}
                       >
-                        Resume v{resume.version_number}
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                          <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" />
+                          <circle cx="8" cy="8" r="1.8" fill="currentColor" stroke="none" />
+                        </svg>
                       </a>
                     ) : (
-                      <span className="page-subtitle">None</span>
-                    )}{" "}
-                    <button
-                      className="btn btn-secondary btn-small"
-                      disabled={uploadingId === a.id}
-                      onClick={() => triggerUpload(a.id)}
-                    >
-                      {uploadingId === a.id ? "Uploading…" : resume ? "Replace" : "Upload"}
-                    </button>
+                      <span className="page-subtitle text-xs">None</span>
+                    )}
+                    <span className="icon-menu-wrapper">
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        disabled={uploadingId === a.id}
+                        aria-label={resume ? "Resume actions" : "Upload resume"}
+                        onClick={() =>
+                          setResumeMenuOpenId(resumeMenuOpenId === a.id ? null : a.id)
+                        }
+                      >
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                          <circle cx="8" cy="3" r="1.4" />
+                          <circle cx="8" cy="8" r="1.4" />
+                          <circle cx="8" cy="13" r="1.4" />
+                        </svg>
+                      </button>
+                      {resumeMenuOpenId === a.id && (
+                        <div className="icon-menu">
+                          <button
+                            type="button"
+                            className="icon-menu-item"
+                            disabled={uploadingId === a.id}
+                            onClick={() => triggerUpload(a.id)}
+                          >
+                            {uploadingId === a.id ? "Uploading…" : resume ? "Replace" : "Upload"}
+                          </button>
+                          {resume && (
+                            <button
+                              type="button"
+                              className="icon-menu-item icon-menu-item-danger"
+                              onClick={() => deleteResume(resume.id)}
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </span>
                     <input
                       ref={(el) => {
                         fileInputs.current[a.id] = el;
@@ -245,6 +315,7 @@ export default function ApplicationsTracker() {
                       hidden
                       onChange={(e) => handleUpload(a.id, e.target.files)}
                     />
+                    </div>
                   </td>
                 </tr>
               );
