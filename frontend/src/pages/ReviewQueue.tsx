@@ -32,14 +32,23 @@ export default function ReviewQueue() {
     load();
   }, []);
 
-  const approve = async (id: number) => {
-    await api.updateApplicationStatus(id, "approved_ready_to_submit");
-    load();
-  };
-
-  const reject = async (id: number) => {
-    await api.updateApplicationStatus(id, "withdrawn", "Rejected during review");
-    load();
+  const moveTo = async (id: number, destination: string) => {
+    if (destination === "") return;
+    try {
+      if (destination === "new_matches") {
+        if (!window.confirm("Move this back to New Matches? This deletes any resume/cover letter generated for it.")) {
+          return;
+        }
+        await api.deleteApplication(id);
+        showToast("Moved back to New Matches.", "success");
+      } else if (destination === "applications") {
+        await api.updateApplicationStatus(id, "applied");
+        showToast("Moved to Applications.", "success");
+      }
+      load();
+    } catch (e) {
+      showToast(`Failed to move this application: ${e}`, "error");
+    }
   };
 
   const generateResume = async (id: number) => {
@@ -117,8 +126,9 @@ export default function ReviewQueue() {
       </div>
       <p className="intro-text">
         Every application here is staged, not submitted. Generate a tailored resume and cover
-        letter, review them, then approve. Nothing goes to an employer until you submit it
-        yourself on the company's own site.
+        letter, review them, then use "Move to" once you've decided: back to New Matches to
+        discard the staging, or to Applications once you've actually applied on the company's
+        own site.
       </p>
       {error && <div className="error-banner">{error}</div>}
       {apps.map((a) => {
@@ -187,12 +197,17 @@ export default function ReviewQueue() {
             />
 
             <div className="review-card-actions">
-              <button className="btn" onClick={() => approve(a.id)}>
-                Approve
-              </button>
-              <button className="btn btn-danger" onClick={() => reject(a.id)}>
-                Reject
-              </button>
+              <select
+                className="field-input"
+                value=""
+                onChange={(e) => moveTo(a.id, e.target.value)}
+              >
+                <option value="" disabled>
+                  Move to...
+                </option>
+                <option value="new_matches">New Matches</option>
+                <option value="applications">Applications</option>
+              </select>
               <button
                 className="btn btn-secondary"
                 disabled={generating?.id === a.id}
