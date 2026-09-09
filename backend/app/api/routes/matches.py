@@ -1,7 +1,7 @@
 import datetime as dt
 from typing import Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -52,3 +52,34 @@ def list_matches(
 
     stmt = stmt.limit(limit)
     return db.execute(stmt).scalars().all()
+
+
+@router.delete("/{job_posting_id}")
+def delete_match(job_posting_id: int, db: Session = Depends(get_db)):
+    """Permanently removes a posting from New Matches -- for listings that have
+    expired/been pulled and are just cluttering the list. Refuses to delete a
+    posting that's already been staged into an Application (it wouldn't be
+    showing in New Matches in that case anyway per list_matches' exclusion
+    filter, but another tab/request could have staged it a moment ago), since
+    that would silently orphan the Application's job_posting_id foreign key.
+    Re-ingestion isn't blocked afterwards -- dedup_hash uniqueness only guards
+    against duplicates while a row still exists, so if the same posting is
+    scraped again later it will simply reappear, which is the expected
+    behaviour for "no longer available", not "never show this again".
+    """
+    job_posting = db.get(JobPosting, job_posting_id)
+    if job_posting is None:
+        raise HTTPException(status_code=404, detail="Job posting not found")
+
+    staged = db.execute(
+        select(Application.id).where(Application.job_posting_id == job_posting_id)
+    ).scalar_one_or_none()
+    if staged is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="This posting has already been staged as an application -- remove it from Applications instead.",
+        )
+
+    db.delete(job_posting)
+    db.commit()
+    return {"deleted": True}

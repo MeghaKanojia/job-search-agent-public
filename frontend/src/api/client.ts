@@ -203,6 +203,7 @@ export const api = {
     if (postedWithinDays !== undefined) params.set("posted_within_days", String(postedWithinDays));
     return request<JobPosting[]>(`/matches?${params.toString()}`);
   },
+  deleteMatch: (id: number) => request<{ deleted: boolean }>(`/matches/${id}`, { method: "DELETE" }),
   listApplications: (status?: string) =>
     request<Application[]>(`/applications${status ? `?status=${status}` : ""}`),
   stageApplication: (jobPostingId: number, notes?: string) =>
