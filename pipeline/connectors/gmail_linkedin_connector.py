@@ -78,6 +78,18 @@ def _extract_companies(email_text: str, titles: list[str]) -> dict[str, str | No
         fallback_provider = "gemini" if config.default_llm_provider != "gemini" else "groq"
         result = llm_chat(_COMPANY_EXTRACTION_SYSTEM_PROMPT, user_prompt, provider=fallback_provider)
     if result is None:
+        # If this fires on every email, the workflow run's own log is the place to
+        # look -- get_provider() silently falls back to the default provider when
+        # the named one isn't configured, so this can mean the fallback provider's
+        # API key was never added as a secret on *this* repo specifically (GitHub
+        # Actions secrets are separate from whatever's set on the Render backend).
+        logger.warning(
+            "gmail_linkedin: company extraction got no result from either provider "
+            "(default=%s, fallback=%s) -- check that both GROQ_API_KEY and "
+            "GEMINI_API_KEY are set as repo secrets, not just on the backend",
+            config.default_llm_provider,
+            fallback_provider,
+        )
         return {}
     cleaned = result.strip()
     if cleaned.startswith("```"):

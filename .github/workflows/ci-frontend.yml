@@ -15,7 +15,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm ci
+      # npm ci against the public registry has shown intermittent transient failures
+      # (observed: the identical commit both failing and succeeding across reruns,
+      # with the failure always at this step, never at the build itself) -- retrying
+      # a couple times before giving up avoids a red X on a run that would have
+      # passed on its own a few seconds later.
+      - name: npm ci (with retry)
         working-directory: frontend
+        run: |
+          for attempt in 1 2 3; do
+            npm ci && exit 0
+            echo "npm ci failed (attempt $attempt), retrying..."
+            sleep 10
+          done
+          exit 1
       - run: npm run build
         working-directory: frontend

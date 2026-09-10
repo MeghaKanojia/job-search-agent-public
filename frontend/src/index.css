@@ -146,13 +146,15 @@
     @apply bg-white text-slate-900 border border-slate-200;
   }
 
-  /* Global "an api.* call is in flight" indicator, see components/LoadingIndicator.tsx */
+  /* Global "an api.* call is in flight" indicator, see components/LoadingIndicator.tsx.
+     Centered and non-blocking -- it doesn't dim the page or capture clicks, it's
+     just a visible cue, not a modal. */
   .loading-indicator {
-    @apply fixed top-4 right-6 z-50 flex items-center gap-2 bg-white border border-slate-200 rounded-full shadow-sm px-3 py-1.5 text-xs font-medium text-slate-500;
+    @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex items-center gap-2.5 bg-white border border-slate-200 rounded-full shadow-md px-4 py-2.5 text-sm font-medium text-slate-600 pointer-events-none;
   }
 
   .spinner {
-    @apply block w-3.5 h-3.5 rounded-full border-2 border-slate-200 border-t-blue-600;
+    @apply block w-4 h-4 rounded-full border-2 border-slate-200 border-t-blue-600;
     animation: spin 0.7s linear infinite;
   }
 
