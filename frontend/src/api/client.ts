@@ -157,24 +157,51 @@ export function setAuthHeader(value: string | null): void {
   else sessionStorage.removeItem(AUTH_STORAGE_KEY);
 }
 
+// Tracks in-flight requests so a single app-wide loading indicator (see
+// components/LoadingIndicator.tsx) can show/hide itself without every page
+// having to manage its own loading state -- one counter here covers every
+// api.* call, generated-document uploads included.
+let activeRequests = 0;
+const loadingListeners = new Set<(loading: boolean) => void>();
+
+export function onLoadingChange(listener: (loading: boolean) => void): () => void {
+  loadingListeners.add(listener);
+  return () => loadingListeners.delete(listener);
+}
+
+function beginRequest(): void {
+  activeRequests += 1;
+  if (activeRequests === 1) loadingListeners.forEach((l) => l(true));
+}
+
+function endRequest(): void {
+  activeRequests = Math.max(0, activeRequests - 1);
+  if (activeRequests === 0) loadingListeners.forEach((l) => l(false));
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const authHeader = getAuthHeader();
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(authHeader ? { Authorization: authHeader } : {}),
-    },
-    ...init,
-  });
-  if (res.status === 401) {
-    setAuthHeader(null);
-    window.location.reload();
-    throw new Error("Session expired, please sign in again.");
+  beginRequest();
+  try {
+    const authHeader = getAuthHeader();
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      ...init,
+    });
+    if (res.status === 401) {
+      setAuthHeader(null);
+      window.location.reload();
+      throw new Error("Session expired, please sign in again.");
+    }
+    if (!res.ok) {
+      throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status}`);
+    }
+    return await res.json();
+  } finally {
+    endRequest();
   }
-  if (!res.ok) {
-    throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status}`);
-  }
-  return res.json();
 }
 
 export interface ListMatchesOptions {
@@ -231,23 +258,28 @@ export const api = {
   uploadResume: async (applicationId: number, file: File) => {
     // Not routed through request() -- that helper always sets
     // Content-Type: application/json, which would break this multipart body.
-    const formData = new FormData();
-    formData.append("file", file);
-    const authHeader = getAuthHeader();
-    const res = await fetch(`${BASE_URL}/applications/${applicationId}/upload_resume`, {
-      method: "POST",
-      headers: authHeader ? { Authorization: authHeader } : undefined,
-      body: formData,
-    });
-    if (res.status === 401) {
-      setAuthHeader(null);
-      window.location.reload();
-      throw new Error("Session expired, please sign in again.");
+    beginRequest();
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const authHeader = getAuthHeader();
+      const res = await fetch(`${BASE_URL}/applications/${applicationId}/upload_resume`, {
+        method: "POST",
+        headers: authHeader ? { Authorization: authHeader } : undefined,
+        body: formData,
+      });
+      if (res.status === 401) {
+        setAuthHeader(null);
+        window.location.reload();
+        throw new Error("Session expired, please sign in again.");
+      }
+      if (!res.ok) {
+        throw new Error(`POST /applications/${applicationId}/upload_resume failed: ${res.status}`);
+      }
+      return (await res.json()) as DocumentItem;
+    } finally {
+      endRequest();
     }
-    if (!res.ok) {
-      throw new Error(`POST /applications/${applicationId}/upload_resume failed: ${res.status}`);
-    }
-    return res.json() as Promise<DocumentItem>;
   },
   updateDocumentContent: (id: number, contentText: string) =>
     request<DocumentItem>(`/documents/${id}`, {

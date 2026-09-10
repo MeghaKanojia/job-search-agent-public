@@ -12,6 +12,7 @@ import re
 from bs4 import BeautifulSoup
 from sqlalchemy.engine import Engine
 
+from pipeline.common.config import config
 from pipeline.connectors.base import Connector, ConnectorResult, JobPosting
 from pipeline.gmail_status_sync.gmail_client import get_gmail_service
 from pipeline.llm import chat as llm_chat
@@ -67,6 +68,15 @@ def _extract_companies(email_text: str, titles: list[str]) -> dict[str, str | No
         + email_text[:6000]
     )
     result = llm_chat(_COMPANY_EXTRACTION_SYSTEM_PROMPT, user_prompt)
+    if result is None:
+        # The default provider (usually Groq) shares its daily quota with every
+        # other LLM feature in this app -- a busy day of resume/cover-letter
+        # generation can exhaust it before an ingestion run even starts, which
+        # otherwise silently turns into "Unknown company" for every posting in
+        # this email. Retry once against the other configured provider before
+        # giving up, same no-fabrication contract either way.
+        fallback_provider = "gemini" if config.default_llm_provider != "gemini" else "groq"
+        result = llm_chat(_COMPANY_EXTRACTION_SYSTEM_PROMPT, user_prompt, provider=fallback_provider)
     if result is None:
         return {}
     cleaned = result.strip()
@@ -146,11 +156,23 @@ class GmailLinkedInConnector(Connector):
 
 
 def _extract_html(message: dict) -> str | None:
+    """Searches the full MIME tree, not just the top level -- some alert emails
+    nest their HTML body inside a multipart/alternative that's itself nested
+    inside a multipart/mixed (e.g. when the message also carries inline
+    images), and a shallow scan silently finds nothing for those, dropping
+    every posting in the email rather than just its company names.
+    """
     payload = message.get("payload", {})
-    parts = payload.get("parts") or [payload]
-    for part in parts:
+
+    def _search(part: dict) -> str | None:
         if part.get("mimeType") == "text/html":
             data = part.get("body", {}).get("data")
             if data:
                 return base64.urlsafe_b64decode(data).decode("utf-8", errors="ignore")
-    return None
+        for child in part.get("parts") or []:
+            found = _search(child)
+            if found is not None:
+                return found
+        return None
+
+    return _search(payload)

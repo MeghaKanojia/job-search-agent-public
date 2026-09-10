@@ -7,6 +7,7 @@ import ResumeLibrary from "./pages/ResumeLibrary";
 import ReviewQueue from "./pages/ReviewQueue";
 import SettingsPage from "./pages/Settings";
 import { getAuthHeader, setAuthHeader } from "./api/client";
+import LoadingIndicator from "./components/LoadingIndicator";
 import Login from "./components/Login";
 import { ToastProvider } from "./components/Toast";
 
@@ -33,6 +34,7 @@ export default function App() {
 
   return (
     <ToastProvider>
+      <LoadingIndicator />
       <Router>
         <div className="app-shell">
           <nav className="sidebar">

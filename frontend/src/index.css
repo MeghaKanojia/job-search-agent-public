@@ -146,6 +146,16 @@
     @apply bg-white text-slate-900 border border-slate-200;
   }
 
+  /* Global "an api.* call is in flight" indicator, see components/LoadingIndicator.tsx */
+  .loading-indicator {
+    @apply fixed top-4 right-6 z-50 flex items-center gap-2 bg-white border border-slate-200 rounded-full shadow-sm px-3 py-1.5 text-xs font-medium text-slate-500;
+  }
+
+  .spinner {
+    @apply block w-3.5 h-3.5 rounded-full border-2 border-slate-200 border-t-blue-600;
+    animation: spin 0.7s linear infinite;
+  }
+
   /* Filter bars / forms */
   .filter-bar {
     @apply flex items-end gap-5 bg-white border border-slate-100 rounded-2xl shadow-sm px-5 py-4 mb-5 flex-wrap;
@@ -439,5 +449,11 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
