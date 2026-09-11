@@ -15,17 +15,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      # npm ci against the public registry has shown intermittent transient failures
-      # (observed: the identical commit both failing and succeeding across reruns,
-      # with the failure always at this step, never at the build itself) -- retrying
-      # a couple times before giving up avoids a red X on a run that would have
-      # passed on its own a few seconds later.
-      - name: npm ci (with retry)
+      # No package-lock.json is committed in this repo, so `npm ci` (which
+      # requires one) fails deterministically every run, not intermittently --
+      # an earlier version of this step wrongly diagnosed it as flaky and added
+      # a retry loop around the same failing command, which never helped.
+      # `npm install` doesn't require a lockfile; retrying it still guards
+      # against genuine registry blips.
+      - name: npm install (with retry)
         working-directory: frontend
         run: |
           for attempt in 1 2 3; do
-            npm ci && exit 0
-            echo "npm ci failed (attempt $attempt), retrying..."
+            npm install && exit 0
+            echo "npm install failed (attempt $attempt), retrying..."
             sleep 10
           done
           exit 1

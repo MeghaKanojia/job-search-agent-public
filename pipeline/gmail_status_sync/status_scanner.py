@@ -74,40 +74,49 @@ def main() -> int:
             continue
 
         for m in messages:
-            full = service.users().messages().get(userId="me", id=m["id"], format="full").execute()
-            snippet = full.get("snippet", "")
-            proposed_status, confidence = _classify(snippet)
-            if proposed_status is None:
-                continue
-
-            with engine.begin() as conn:
-                already_proposed = conn.execute(
-                    text(
-                        "SELECT 1 FROM status_update_proposals "
-                        "WHERE application_id = :app_id AND gmail_message_id = :msg_id"
-                    ),
-                    {"app_id": app.id, "msg_id": m["id"]},
-                ).fetchone()
-                if already_proposed:
+            try:
+                full = service.users().messages().get(userId="me", id=m["id"], format="full").execute()
+                snippet = full.get("snippet", "")
+                proposed_status, confidence = _classify(snippet)
+                if proposed_status is None:
                     continue
 
-                conn.execute(
-                    text(
-                        """
-                        INSERT INTO status_update_proposals
-                            (application_id, proposed_status, evidence_snippet, gmail_message_id, confidence)
-                        VALUES (:app_id, :status, :snippet, :msg_id, :confidence)
-                        """
-                    ),
-                    {
-                        "app_id": app.id,
-                        "status": proposed_status,
-                        "snippet": full.get("snippet", ""),
-                        "msg_id": m["id"],
-                        "confidence": confidence,
-                    },
+                with engine.begin() as conn:
+                    already_proposed = conn.execute(
+                        text(
+                            "SELECT 1 FROM status_update_proposals "
+                            "WHERE application_id = :app_id AND gmail_message_id = :msg_id"
+                        ),
+                        {"app_id": app.id, "msg_id": m["id"]},
+                    ).fetchone()
+                    if already_proposed:
+                        continue
+
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO status_update_proposals
+                                (application_id, proposed_status, evidence_snippet, gmail_message_id, confidence)
+                            VALUES (:app_id, :status, :snippet, :msg_id, :confidence)
+                            """
+                        ),
+                        {
+                            "app_id": app.id,
+                            "status": proposed_status,
+                            "snippet": full.get("snippet", ""),
+                            "msg_id": m["id"],
+                            "confidence": confidence,
+                        },
+                    )
+                    proposals_written += 1
+            except Exception as exc:  # noqa: BLE001 -- one bad message must not kill the whole scan
+                logger.warning(
+                    "status_scanner: failed to process message %s for company=%s: %s",
+                    m["id"],
+                    app.company,
+                    exc,
                 )
-                proposals_written += 1
+                continue
 
     logger.info("status scan complete, proposals_written=%d", proposals_written)
     return 0
