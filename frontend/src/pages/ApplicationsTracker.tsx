@@ -19,6 +19,7 @@ function latestResumeFor(docs: DocumentItem[], applicationId: number): DocumentI
 export default function ApplicationsTracker() {
   const [apps, setApps] = useState<Application[]>([]);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
   const [uploadingId, setUploadingId] = useState<number | null>(null);
@@ -65,13 +66,24 @@ export default function ApplicationsTracker() {
   }, [statusFilter]);
 
   const sortedApps = useMemo(() => {
-    const copy = [...apps];
+    const q = search.trim().toLowerCase();
+    const filtered = q
+      ? apps.filter(
+          (a) =>
+            (a.company ?? "").toLowerCase().includes(q) || (a.role_title ?? "").toLowerCase().includes(q)
+        )
+      : apps;
+    const copy = [...filtered];
     copy.sort((a, b) => {
       const diff = new Date(a.last_status_change_at).getTime() - new Date(b.last_status_change_at).getTime();
       return sortDir === "asc" ? diff : -diff;
     });
     return copy;
-  }, [apps, sortDir]);
+  }, [apps, search, sortDir]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
 
   const pageCount = Math.max(1, Math.ceil(sortedApps.length / PAGE_SIZE));
   const pagedApps = sortedApps.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -155,7 +167,7 @@ export default function ApplicationsTracker() {
       <div className="page-header">
         <div>
           <h1>Applications</h1>
-          <div className="page-subtitle">{apps.length} tracked</div>
+          <div className="page-subtitle">{sortedApps.length} tracked</div>
         </div>
       </div>
 
@@ -176,6 +188,16 @@ export default function ApplicationsTracker() {
       )}
 
       <div className="filter-bar">
+        <div className="filter-field">
+          <label htmlFor="app-search">Search</label>
+          <input
+            id="app-search"
+            type="text"
+            placeholder="Company or role"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="filter-field">
           <label htmlFor="status-filter">Status</label>
           <select id="status-filter" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
@@ -322,7 +344,11 @@ export default function ApplicationsTracker() {
             })}
           </tbody>
         </table>
-        {apps.length === 0 && <div className="empty-state">No applications tracked yet.</div>}
+        {sortedApps.length === 0 && (
+          <div className="empty-state">
+            {apps.length === 0 ? "No applications tracked yet." : "No applications match your search."}
+          </div>
+        )}
         <Pagination
           page={page}
           pageCount={pageCount}

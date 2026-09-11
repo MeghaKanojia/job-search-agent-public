@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, Application, DocumentItem } from "../api/client";
 import { useToast } from "../components/Toast";
 
@@ -19,6 +19,7 @@ const PENDING_STATUSES = ["staged_for_review", "approved_ready_to_submit"];
 export default function ReviewQueue() {
   const [apps, setApps] = useState<Application[]>([]);
   const [docs, setDocs] = useState<DocumentItem[]>([]);
+  const [search, setSearch] = useState("");
   const [generating, setGenerating] = useState<GeneratingTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Optional per-application tweak request, threaded into the LLM prompt for
@@ -123,12 +124,20 @@ export default function ReviewQueue() {
     }
   };
 
+  const filteredApps = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return apps;
+    return apps.filter(
+      (a) => (a.company ?? "").toLowerCase().includes(q) || (a.role_title ?? "").toLowerCase().includes(q)
+    );
+  }, [apps, search]);
+
   return (
     <div>
       <div className="page-header">
         <div>
           <h1>Review Queue</h1>
-          <div className="page-subtitle">{apps.length} staged for your review</div>
+          <div className="page-subtitle">{filteredApps.length} staged for your review</div>
         </div>
       </div>
       <p className="intro-text">
@@ -138,7 +147,23 @@ export default function ReviewQueue() {
         own site.
       </p>
       {error && <div className="error-banner">{error}</div>}
-      {apps.map((a) => {
+
+      {apps.length > 0 && (
+        <div className="filter-bar">
+          <div className="filter-field">
+            <label htmlFor="review-search">Search</label>
+            <input
+              id="review-search"
+              type="text"
+              placeholder="Company or role"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+      )}
+
+      {filteredApps.map((a) => {
         const appDocs = docs.filter((d) => d.application_id === a.id);
         return (
           <div key={a.id} className="review-card">
@@ -235,7 +260,11 @@ export default function ReviewQueue() {
           </div>
         );
       })}
-      {apps.length === 0 && <div className="empty-state">Nothing staged for review right now.</div>}
+      {filteredApps.length === 0 && (
+        <div className="empty-state">
+          {apps.length === 0 ? "Nothing staged for review right now." : "No staged applications match your search."}
+        </div>
+      )}
     </div>
   );
 }

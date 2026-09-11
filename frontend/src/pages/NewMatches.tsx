@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, JobPosting } from "../api/client";
 import { useToast } from "../components/Toast";
 
@@ -36,6 +36,7 @@ function FreshnessBadge({ postedAt }: { postedAt: string | null }) {
 export default function NewMatches() {
   const [postings, setPostings] = useState<JobPosting[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("posted_at");
   const [postedWithinDays, setPostedWithinDays] = useState<string>("");
   const [minScore, setMinScore] = useState<number>(0);
@@ -99,15 +100,25 @@ export default function NewMatches() {
     }
   };
 
-  const allSelected = postings.length > 0 && postings.every((p) => selectedIds.has(p.id));
+  // Client-side, not a new API call -- postings for the current filter set are
+  // already in memory, and this list tops out at `limit` (50) rows.
+  const filteredPostings = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return postings;
+    return postings.filter(
+      (p) => p.title.toLowerCase().includes(q) || (p.company ?? "").toLowerCase().includes(q)
+    );
+  }, [postings, search]);
+
+  const allSelected = filteredPostings.length > 0 && filteredPostings.every((p) => selectedIds.has(p.id));
 
   const toggleAll = () => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (allSelected) {
-        postings.forEach((p) => next.delete(p.id));
+        filteredPostings.forEach((p) => next.delete(p.id));
       } else {
-        postings.forEach((p) => next.add(p.id));
+        filteredPostings.forEach((p) => next.add(p.id));
       }
       return next;
     });
@@ -150,7 +161,9 @@ export default function NewMatches() {
       <div className="page-header">
         <div>
           <h1>New Matches</h1>
-          <div className="page-subtitle">{postings.length} posting{postings.length === 1 ? "" : "s"}</div>
+          <div className="page-subtitle">
+            {filteredPostings.length} posting{filteredPostings.length === 1 ? "" : "s"}
+          </div>
         </div>
       </div>
 
@@ -171,6 +184,16 @@ export default function NewMatches() {
       )}
 
       <div className="filter-bar">
+        <div className="filter-field">
+          <label htmlFor="search">Search</label>
+          <input
+            id="search"
+            type="text"
+            placeholder="Job title or company"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="filter-field">
           <label htmlFor="sort">Sort by</label>
           <select id="sort" value={sort} onChange={(e) => setSort(e.target.value as SortOption)}>
@@ -203,7 +226,7 @@ export default function NewMatches() {
       </div>
 
       <div className="card">
-        {postings.length > 0 && (
+        {filteredPostings.length > 0 && (
           <div className="job-row job-row-select-all">
             <div className="checkbox-col">
               <input type="checkbox" checked={allSelected} onChange={toggleAll} aria-label="Select all" />
@@ -211,7 +234,7 @@ export default function NewMatches() {
             <div className="job-row-main page-subtitle">Select all</div>
           </div>
         )}
-        {postings.map((p) => (
+        {filteredPostings.map((p) => (
           <div className={`job-row${selectedIds.has(p.id) ? " row-selected" : ""}`} key={p.id}>
             <div className="checkbox-col">
               <input
@@ -273,8 +296,12 @@ export default function NewMatches() {
             </span>
           </div>
         ))}
-        {postings.length === 0 && !error && (
-          <div className="empty-state">No matches yet for these filters. Try widening the date range.</div>
+        {filteredPostings.length === 0 && !error && (
+          <div className="empty-state">
+            {postings.length === 0
+              ? "No matches yet for these filters. Try widening the date range."
+              : "No postings match your search."}
+          </div>
         )}
       </div>
     </div>

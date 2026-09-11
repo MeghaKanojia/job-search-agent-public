@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, DocumentItem } from "../api/client";
 import Pagination from "../components/Pagination";
 
@@ -16,6 +16,7 @@ function formatDate(value: string): string {
 
 export default function ResumeLibrary() {
   const [docs, setDocs] = useState<DocumentItem[]>([]);
+  const [search, setSearch] = useState("");
   const [cleanupDays, setCleanupDays] = useState("90");
   const [status, setStatus] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -28,6 +29,18 @@ export default function ResumeLibrary() {
     load();
   }, []);
 
+  const filteredDocs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return docs;
+    return docs.filter(
+      (d) => (d.company ?? "").toLowerCase().includes(q) || (d.role_title ?? "").toLowerCase().includes(q)
+    );
+  }, [docs, search]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
   const cleanupOld = async () => {
     const result = await api.deleteOldDocuments(Number(cleanupDays));
     setStatus(`Deleted ${result.deleted_count} document${result.deleted_count === 1 ? "" : "s"}.`);
@@ -35,8 +48,8 @@ export default function ResumeLibrary() {
     load();
   };
 
-  const pageCount = Math.max(1, Math.ceil(docs.length / PAGE_SIZE));
-  const pagedDocs = docs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const pageCount = Math.max(1, Math.ceil(filteredDocs.length / PAGE_SIZE));
+  const pagedDocs = filteredDocs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const allSelected = pagedDocs.length > 0 && pagedDocs.every((d) => selectedIds.has(d.id));
 
@@ -83,7 +96,9 @@ export default function ResumeLibrary() {
       <div className="page-header">
         <div>
           <h1>Resume Library</h1>
-          <div className="page-subtitle">{docs.length} document{docs.length === 1 ? "" : "s"}</div>
+          <div className="page-subtitle">
+            {filteredDocs.length} document{filteredDocs.length === 1 ? "" : "s"}
+          </div>
         </div>
       </div>
       <p className="intro-text">
@@ -106,6 +121,16 @@ export default function ResumeLibrary() {
       )}
 
       <div className="filter-bar">
+        <div className="filter-field">
+          <label htmlFor="resume-search">Search</label>
+          <input
+            id="resume-search"
+            type="text"
+            placeholder="Company or role"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         <div className="filter-field">
           <label htmlFor="cleanup-days">Clean up</label>
           <select id="cleanup-days" value={cleanupDays} onChange={(e) => setCleanupDays(e.target.value)}>
@@ -170,15 +195,17 @@ export default function ResumeLibrary() {
             ))}
           </tbody>
         </table>
-        {docs.length === 0 && (
+        {filteredDocs.length === 0 && (
           <div className="empty-state">
-            No documents yet. Generate one from the Review Queue.
+            {docs.length === 0
+              ? "No documents yet. Generate one from the Review Queue."
+              : "No documents match your search."}
           </div>
         )}
         <Pagination
           page={page}
           pageCount={pageCount}
-          totalItems={docs.length}
+          totalItems={filteredDocs.length}
           pageSize={PAGE_SIZE}
           onPageChange={setPage}
         />
