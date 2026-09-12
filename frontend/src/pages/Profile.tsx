@@ -8,7 +8,7 @@ import {
   SkillProfileItemInput,
   WorkExperienceItem,
 } from "../api/client";
-import SectionManager, { formatMonthYear } from "../components/SectionManager";
+import SectionManager, { EditIcon, formatMonthYear, ToggleIcon, TrashIcon } from "../components/SectionManager";
 
 const TABS = ["Skills", "Education", "Experience", "Projects", "Certifications"] as const;
 type Tab = (typeof TABS)[number];
@@ -209,15 +209,27 @@ function SkillsSection() {
                     </span>
                   </td>
                   <td>
-                    <button className="btn btn-secondary btn-small" onClick={() => startEdit(item)}>
-                      Edit
-                    </button>{" "}
-                    <button className="btn btn-secondary btn-small" onClick={() => toggleActive(item)}>
-                      {item.is_active ? "Deactivate" : "Activate"}
-                    </button>{" "}
-                    <button className="btn btn-danger btn-small" onClick={() => remove(item.id)}>
-                      Delete
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Edit" title="Edit">
+                        <EditIcon />
+                      </button>
+                      <button
+                        className="icon-btn"
+                        onClick={() => toggleActive(item)}
+                        aria-label={item.is_active ? "Deactivate" : "Activate"}
+                        title={item.is_active ? "Deactivate" : "Activate"}
+                      >
+                        <ToggleIcon />
+                      </button>
+                      <button
+                        className="icon-btn icon-btn-danger"
+                        onClick={() => remove(item.id)}
+                        aria-label="Delete"
+                        title="Delete"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               )

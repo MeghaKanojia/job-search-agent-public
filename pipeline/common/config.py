@@ -33,11 +33,22 @@ class PipelineConfig:
     # and gated by pipeline_settings, not a "clean" official integration).
     irish_boards_search_url: str = os.environ.get("IRISH_BOARDS_SEARCH_URL", "")
 
+    # The original list only ever searched the plain role names, which JobSpy/Indeed/
+    # LinkedIn's own ranking mostly surfaces as mid-to-senior openings for -- a
+    # graduate-scheme posting titled "Graduate Data Analyst" doesn't reliably show up
+    # in the top `results_wanted` results for a bare "Data Analyst" search. These
+    # additional terms search for that phrasing explicitly instead of relying on it
+    # to surface on its own; keyword_filter.py's role-noun+domain-qualifier match
+    # already accepts these titles fine, so this was purely a search-coverage gap,
+    # not a filtering one. Additive, not a replacement -- existing senior/manager
+    # results keep showing up exactly as before.
     search_terms: list[str] = [
         t.strip()
         for t in os.environ.get(
             "SEARCH_TERMS",
-            "Data Engineer,Data Analyst,Data Scientist,AI Engineer,ML Engineer,Analytics Engineer",
+            "Data Engineer,Data Analyst,Data Scientist,AI Engineer,ML Engineer,Analytics Engineer,"
+            "Graduate Data Analyst,Graduate Data Engineer,Graduate Data Scientist,"
+            "Junior Data Analyst,Junior Data Engineer,Entry Level Data Analyst",
         ).split(",")
         if t.strip()
     ]

@@ -179,17 +179,32 @@ export default function ResumeLibrary() {
                 <td>v{d.version_number}</td>
                 <td>{formatDate(d.generated_at)}</td>
                 <td>
-                  <a
-                    className="btn btn-secondary btn-small"
-                    href={api.documentPreviewUrl(d.id)}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Preview
-                  </a>{" "}
-                  <a className="btn btn-secondary btn-small" href={api.documentDownloadUrl(d.id)}>
-                    Download
-                  </a>
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      className="icon-btn"
+                      href={api.documentPreviewUrl(d.id)}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="Preview"
+                      title="Preview"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                        <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" />
+                        <circle cx="8" cy="8" r="1.8" fill="currentColor" stroke="none" />
+                      </svg>
+                    </a>
+                    <a
+                      className="icon-btn"
+                      href={api.documentDownloadUrl(d.id)}
+                      aria-label="Download"
+                      title="Download"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M8 1.5v8m0 0L5 6.5m3 3 3-3" />
+                        <path d="M2.5 11v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" />
+                      </svg>
+                    </a>
+                  </div>
                 </td>
               </tr>
             ))}

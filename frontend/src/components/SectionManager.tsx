@@ -30,6 +30,33 @@ interface SectionManagerProps<T extends BaseItem> {
   renderSubtitle?: (item: T) => string | null;
 }
 
+// Exported for reuse by Profile.tsx's SkillsSection, which has the identical
+// edit/activate/delete row pattern but isn't itself a SectionManager instance.
+export function EditIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M11 2l3 3-8 8-3.5 1 1-3.5 8-8Z" />
+    </svg>
+  );
+}
+
+export function ToggleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
+      <path d="M8 1.5v6" />
+      <path d="M4.5 3.5a5.5 5.5 0 1 0 7 0" />
+    </svg>
+  );
+}
+
+export function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2.5 4h11M6 4V2.5h4V4M3.5 4l.6 9a1 1 0 0 0 1 .9h5.8a1 1 0 0 0 1-.9l.6-9" />
+    </svg>
+  );
+}
+
 export function formatMonthYear(value: string | null | undefined): string {
   if (!value) return "";
   const d = new Date(value);
@@ -207,14 +234,24 @@ export default function SectionManager<T extends BaseItem>({
               <span className={`badge ${item.is_active ? "badge-fresh" : "badge-neutral"}`}>
                 {item.is_active ? "Active" : "Inactive"}
               </span>
-              <button className="btn btn-secondary btn-small" onClick={() => startEdit(item)}>
-                Edit
+              <button className="icon-btn" onClick={() => startEdit(item)} aria-label="Edit" title="Edit">
+                <EditIcon />
               </button>
-              <button className="btn btn-secondary btn-small" onClick={() => toggleActive(item)}>
-                {item.is_active ? "Deactivate" : "Activate"}
+              <button
+                className="icon-btn"
+                onClick={() => toggleActive(item)}
+                aria-label={item.is_active ? "Deactivate" : "Activate"}
+                title={item.is_active ? "Deactivate" : "Activate"}
+              >
+                <ToggleIcon />
               </button>
-              <button className="btn btn-danger btn-small" onClick={() => remove(item.id)}>
-                Delete
+              <button
+                className="icon-btn icon-btn-danger"
+                onClick={() => remove(item.id)}
+                aria-label="Delete"
+                title="Delete"
+              >
+                <TrashIcon />
               </button>
             </div>
           </div>
