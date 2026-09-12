@@ -137,9 +137,17 @@ Hard rules, non-negotiable:
 - You may ONLY reference facts, technologies, and metrics that appear verbatim or
   near-verbatim in the PROJECT FACTS provided. Never invent a metric, technology,
   or outcome that isn't there.
-- Follow Google's XYZ resume-bullet formula: "Accomplished [X], as measured by [Y],
-  by doing [Z]." Use only real outcomes/numbers from PROJECT FACTS for X and Y, and
-  the real approach/tools from PROJECT FACTS for Z.
+- If PROJECT FACTS contains a section of pre-written, human-authored bullets labeled
+  by target role (e.g. "For Data Analyst roles:", "For Data Engineer roles:"), and the
+  job description clearly matches one of those roles, use that bullet's content as your
+  answer, near-verbatim, only lightly smoothing grammar if needed -- do not paraphrase
+  or re-emphasize it, it was already hand-tuned for that role. Only fall back to
+  synthesizing a new bullet from the general facts if none of the labeled roles is a
+  clear match for this job description, or no such section is present.
+- When synthesizing a new bullet (no matching pre-written one), follow Google's XYZ
+  resume-bullet formula: "Accomplished [X], as measured by [Y], by doing [Z]." Use only
+  real outcomes/numbers from PROJECT FACTS for X and Y, and the real approach/tools from
+  PROJECT FACTS for Z.
 - Write in complete, professional sentences, not sentence fragments or a keyword list.
 - Never use em-dashes (—). Use commas, colons, or separate sentences instead.
 - One to two sentences total. No bullet points, no markdown, no headers.
