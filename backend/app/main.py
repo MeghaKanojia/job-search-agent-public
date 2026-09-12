@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import applications, documents, matches, profile, settings as settings_routes
+from app.api.routes import analytics, applications, documents, matches, profile, settings as settings_routes
 from app.core.auth import require_auth
 from app.core.config import settings
 
@@ -25,6 +25,7 @@ app.include_router(applications.router, dependencies=_auth_dep)
 app.include_router(documents.router, dependencies=_auth_dep)
 app.include_router(profile.router, dependencies=_auth_dep)
 app.include_router(settings_routes.router, dependencies=_auth_dep)
+app.include_router(analytics.router, dependencies=_auth_dep)
 
 
 @app.get("/health")

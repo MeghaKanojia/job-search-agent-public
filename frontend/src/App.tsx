@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import Analytics from "./pages/Analytics";
 import ApplicationsTracker from "./pages/ApplicationsTracker";
 import NewMatches from "./pages/NewMatches";
 import Profile from "./pages/Profile";
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { to: "/review", label: "Review Queue" },
   { to: "/tracker", label: "Applications" },
   { to: "/resumes", label: "Resume Library" },
+  { to: "/analytics", label: "Analytics" },
   { to: "/profile", label: "Profile" },
   { to: "/settings", label: "Settings" },
 ];
@@ -73,6 +75,7 @@ export default function App() {
               <Route path="/review" element={<ReviewQueue />} />
               <Route path="/tracker" element={<ApplicationsTracker />} />
               <Route path="/resumes" element={<ResumeLibrary />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Routes>

@@ -25,6 +25,38 @@ export interface Application {
   notes: string | null;
 }
 
+export interface AnalyticsFunnel {
+  new_matches: number;
+  staged: number;
+  applied: number;
+  viewed: number;
+  interview: number;
+  offer: number;
+  rejected: number;
+  withdrawn: number;
+}
+
+export interface AnalyticsResponse {
+  range: { start: string | null; end: string };
+  funnel: AnalyticsFunnel;
+  conversion_rates: {
+    staged_to_applied: number | null;
+    applied_to_interview: number | null;
+    interview_to_offer: number | null;
+  };
+  activity_over_time: { date: string; new_matches: number; staged: number; applied: number }[];
+  source_effectiveness: {
+    source: string;
+    matches: number;
+    staged: number;
+    applied: number;
+    interview: number;
+    offer: number;
+  }[];
+  match_score_distribution: { bucket: string; count: number }[];
+  top_keywords: { keyword: string; count: number }[];
+}
+
 export interface KeywordFilterItem {
   id: number;
   pipeline: string;
@@ -321,4 +353,12 @@ export const api = {
     }),
 
   llmStatus: () => request<LLMStatus>("/settings/llm_status"),
+
+  getAnalytics: (startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams();
+    if (startDate) params.set("start_date", startDate);
+    if (endDate) params.set("end_date", endDate);
+    const qs = params.toString();
+    return request<AnalyticsResponse>(`/analytics${qs ? `?${qs}` : ""}`);
+  },
 };
