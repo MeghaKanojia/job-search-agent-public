@@ -6,12 +6,17 @@ It reorders and emphasizes based on JD overlap, it never invents a skill you
 don't actually have. `tests/test_tailoring.py` asserts this directly.
 
 Resume rendering is template-based (Jinja2 + WeasyPrint), zero-cost and
-zero-fabrication-risk by construction. Cover-letter drafting (draft_cover_letter,
-below) uses a free-tier LLM (Groq/Gemini -- see app/services/llm/) for
-natural phrasing, but is grounded strictly in facts you pass it -- the same
-no-fabrication rule is enforced via a strict system prompt rather than by
-construction, so treat any drafted letter as a first draft to skim before
-sending, not an unreviewed final output.
+zero-fabrication-risk by construction. Cover-letter and project-bullet
+drafting (draft_cover_letter, draft_project_bullet, below) use a free-tier
+LLM (Groq/Gemini -- see app/services/llm/) for natural phrasing, grounded
+strictly in facts you pass in. The no-fabrication rule is enforced two ways:
+a strict system prompt, and a runtime grounding check -- both routed through
+app/services/agent_graph.py's draft -> validate -> retry loop, which asks a
+second LLM call to flag any claim the draft makes that isn't actually in the
+grounding facts, and automatically redrafts (up to 2 retries) if so. Still
+treat any drafted text as a first draft to skim before sending, not an
+unreviewed final output, since the critic call is itself an LLM and can miss
+things.
 """
 
 import json
@@ -21,6 +26,7 @@ from dataclasses import dataclass
 from jinja2 import Environment, select_autoescape
 from weasyprint import HTML
 
+from app.services.agent_graph import run_grounded_draft
 from app.services.llm import chat as llm_chat
 from app.services.matching import extract_keywords
 
@@ -187,7 +193,9 @@ def draft_project_bullet(
     )
     if user_instructions:
         user_prompt += _USER_INSTRUCTIONS_NOTE.format(instructions=user_instructions[:500])
-    result = llm_chat(_PROJECT_BULLET_SYSTEM_PROMPT, user_prompt, provider=provider)
+    result = run_grounded_draft(
+        _PROJECT_BULLET_SYSTEM_PROMPT, user_prompt, project_facts, chat_fn=llm_chat, provider=provider
+    )
     if result is None:
         logger.warning("project bullet LLM draft unavailable, caller should fall back to the raw description")
     return result
@@ -226,7 +234,9 @@ def draft_cover_letter(
     )
     if user_instructions:
         user_prompt += _USER_INSTRUCTIONS_NOTE.format(instructions=user_instructions[:500])
-    result = llm_chat(_COVER_LETTER_SYSTEM_PROMPT, user_prompt, provider=provider)
+    result = run_grounded_draft(
+        _COVER_LETTER_SYSTEM_PROMPT, user_prompt, grounding_facts, chat_fn=llm_chat, provider=provider
+    )
     if result is None:
         logger.warning("cover letter LLM draft unavailable, caller should fall back to a static template")
     return result
